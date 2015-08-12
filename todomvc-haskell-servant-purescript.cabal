@@ -1,0 +1,20 @@
+name:                todomvc-haskell-servant-purescript
+version:             0.1.0.0
+synopsis:            todomvc implemented in haskell+servant and purescript
+description:         todomvc implemented in haskell+servant and purescript
+homepage:            https://github.com/adarqui/todomvc-haskell-servant-purescript
+license:             MIT
+license-file:        LICENSE
+author:              Andrew Darqui
+maintainer:          andrew.darqui@gmail.com
+category:            Web
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+library
+  exposed-modules:
+    Web.TodoMVC.Servant
+  build-depends:       base >=4.7 && <4.8
+  hs-source-dirs:      haskell_src
+  default-language:    Haskell2010
