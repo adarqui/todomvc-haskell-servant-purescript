@@ -15,17 +15,11 @@ module Todo.App (
   incrTodoAppCounter
 ) where
 
-import           Control.Applicative
 import           Control.Lens
-import           Control.Lens.Operators
-import           Control.Monad
 import           Control.Monad.State.Lazy
-import           Data.List
+import qualified Data.Map                 as M
 import           Data.Text                (Text)
-import qualified Data.Text                as T
-import           GHC.Generics hiding (to)
 import           Todo.Types
-import qualified Data.Map as M
 
 -- | newTodoApp
 --
@@ -36,7 +30,7 @@ newTodoApp = TodoApp M.empty 0
 -- | listTodos
 --
 listTodos :: TodoAppState [Todo]
-listTodos = gets _todoAppTodos >>= return . M.elems
+listTodos = use (todoAppTodos . to M.elems)
 
 
 -- | addTodo
@@ -44,53 +38,34 @@ listTodos = gets _todoAppTodos >>= return . M.elems
 addTodo :: Todo -> TodoAppState Todo
 addTodo todo = do
   new_id <- incrTodoAppCounter
-  let
-    todo' = set todoId new_id todo
-  todoAppTodos %= M.insert new_id todo'
-  return todo'
+  let new_todo = set todoId new_id todo
+  todoAppTodos %= M.insert new_id new_todo
+  pure new_todo
 
 
 -- | removeTodo
 --
 removeTodo :: TodoId -> TodoAppState (Maybe TodoId)
 removeTodo tid = do
-  -- trying to get this 'use' to work like this 'view':
-  -- view (C.to (M.lookup 1)) M.empty
-  e <- use (to (M.lookup tid)) todoAppTodos
-  maybe (return Nothing) (const del) e
-  where
-    del = todoAppTodos %= M.delete tid >> (pure . pure) tid
+  e <- use (todoAppTodos . to (M.lookup tid))
+  maybe (pure Nothing) (const del) e
 
-{-
-  todos <- gets _todoAppTodos
-  let
-    e = M.lookup tid todos
-  case e of
-    Just _ -> do
-      todoAppTodos %= M.delete tid
-      return $ Just tid
-    _      -> pure Nothing
-    -}
-{-
-  todos <- gets _todoAppTodos
-  let
-    e = M.lookup tid todos
-  case e of
-    Just _ -> modify (\st -> st { _todoAppTodos = M.delete tid (_todoAppTodos st) }) *> (pure . pure) tid
-    _      -> pure Nothing
-    -}
+  where
+  del = todoAppTodos %= M.delete tid >> (pure . pure) tid
 
 
 -- | updateTodo
 --
 updateTodo :: TodoId -> Todo -> TodoAppState (Maybe Todo)
-updateTodo tid new_todo = do
-  let
-    new_todo' = new_todo { _todoId = tid }
+updateTodo tid updated_todo = do
   todo <- findTodoById tid
-  case todo of
-    Just todo' -> modify (\st -> st { _todoAppTodos = M.update (const $ pure new_todo') tid (_todoAppTodos st) }) *> (pure . pure) new_todo'
-    _          -> pure Nothing
+  maybe (pure Nothing) (const update) todo
+
+  where
+  new_todo = set todoId tid updated_todo
+  update   = do
+    todoAppTodos %= M.update (const $ pure new_todo) tid
+    (pure . pure) new_todo
 
 
 -- | findTodoById
@@ -109,9 +84,6 @@ clearTodos = do
 
 -- | incrTodoAppCounter
 --
--- >>> runState (incrTodoAppCounter >> incrTodoAppCounter) newTodoApp
--- (2,TodoApp {todoAppTodos = [], todoAppCounter = 2})
---
 incrTodoAppCounter :: TodoAppState TodoId
 incrTodoAppCounter = do
   todoAppCounter += 1
@@ -119,9 +91,6 @@ incrTodoAppCounter = do
 
 
 -- | defaultTodo
---
--- >>> defaultTodo "hi!"
--- Todo {todoId = 0, todoTitle = "hi!", todoState = Active}
 --
 defaultTodo :: Text -> Todo
 defaultTodo title = Todo 0 title Active
@@ -136,4 +105,5 @@ runTodoGrammar ReqListTodos              = RespListTodos           <$> listTodos
 runTodoGrammar (ReqAddTodo todo)         = (RespAddTodo . Just)    <$> addTodo todo
 runTodoGrammar (ReqRemoveTodo tid)       = RespRemoveTodo          <$> removeTodo tid
 runTodoGrammar (ReqUpdateTodo tid todo)  = RespUpdateTodo          <$> updateTodo tid todo
+runTodoGrammar (ReqFindTodoById tid)     = RespFindTodoById        <$> findTodoById tid
 runTodoGrammar ReqClearTodos             = RespClearTodos          <$> clearTodos

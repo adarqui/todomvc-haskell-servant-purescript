@@ -77,4 +77,5 @@ runApp_Maybe store cb = runApp store cb >>= maybe (left err400) return
 --
 -- bleh: having some weird type errors
 --
+apply2 :: MonadIO m => (t -> t1 -> State TodoApp (Maybe b)) -> Store -> t -> t1 -> EitherT ServantErr m b
 apply2 f s x y = runApp_Maybe s (f x y)
