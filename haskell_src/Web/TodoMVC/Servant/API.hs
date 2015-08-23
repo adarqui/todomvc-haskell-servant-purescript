@@ -19,11 +19,9 @@ import           Web.TodoMVC.Servant.Shared
 --
 server :: Store -> Server LnAPI
 server store =
-  -- static
        serveDirectory "./html"
   :<|> serveDirectory "./dist"
   :<|> serveDirectory "./bower_components"
-  -- application: todo simple
   :<|> runApp store listTodos
   :<|> runApp store . addTodo
   :<|> runApp store clearTodos
@@ -39,10 +37,9 @@ app store = serve todoAPI $ server store
 -- | runServer
 --
 -- runs the API servers on:
--- http://localhost:8080
+-- http://localhost:1080
 --
 runServer :: IO ()
 runServer = do
-  -- writeJSFiles
   store <- newBigState
   run 1080 $ app store
