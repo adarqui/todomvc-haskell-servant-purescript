@@ -24,9 +24,9 @@ data TodoState
 -- | Todo
 --
 data Todo = Todo {
-  todoId    :: TodoId,
-  todoTitle :: String,
-  todoState :: TodoState
+  _todoId    :: TodoId,
+  _todoTitle :: String,
+  _todoState :: TodoState
 }
 
 -- | TodoActionRequest
@@ -58,6 +58,6 @@ data TodoActionResponse
 -- | An internal todo application
 --
 data TodoApp = TodoApp {
-  todoAppCounter :: TodoId,
-  todoAppTodos   :: M.Map TodoId Todo
+  _todoAppCounter :: TodoId,
+  _todoAppTodos   :: M.Map TodoId Todo
 }

@@ -84,17 +84,17 @@ todo = component render eval
   render tv_@(TodoView tv) =
     let
       t = todoFromObj $ tv.tvTodo
-      v = H.label [] [H.text t.todoTitle]
+      v = H.label [] [H.text t._todoTitle]
     in
-    H.li [if t.todoState == Completed then _class "completed" else _class "active"] [
+    H.li [if t._todoState == Completed then _class "completed" else _class "active"] [
       H.div [_class "view"] [
-        H.input [_class "toggle", P.type_ "checkbox", P.checked (t.todoState == Completed), E.onChange (E.input_ ToggleCompleted)],
+        H.input [_class "toggle", P.type_ "checkbox", P.checked (t._todoState == Completed), E.onChange (E.input_ ToggleCompleted)],
         case tv.tvMode of
-           TvmView -> H.label [E.onClick (E.input_ (SetTvm TvmEdit))] [H.text t.todoTitle]
-           TvmEdit -> H.input [_class "new-todo", P.value t.todoTitle, E.onValueChange (E.input UpdateTitle), E.onFocusOut (E.input_ (SetTvm TvmView))],
+           TvmView -> H.label [E.onClick (E.input_ (SetTvm TvmEdit))] [H.text t._todoTitle]
+           TvmEdit -> H.input [_class "new-todo", P.value t._todoTitle, E.onValueChange (E.input UpdateTitle), E.onFocusOut (E.input_ (SetTvm TvmView))],
         H.button [_class "destroy", E.onClick (E.input_ Remove)] []
       ],
-      H.input [_class "edit", P.value t.todoTitle]
+      H.input [_class "edit", P.value t._todoTitle]
     ]
 
   eval :: Eval TodoInput TodoView TodoInput TodoEffects
@@ -128,11 +128,11 @@ todo = component render eval
 
 ajaxUpdateTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) (Maybe Todo)
 ajaxUpdateTodo todo@(Todo t) = do
-  res <- affjax $ defaultRequest { method = PUT, url = (baseURL ++ show t.todoId), content = Just (encode todo), headers = [ContentType applicationJSON] }
+  res <- affjax $ defaultRequest { method = PUT, url = (baseURL ++ show t._todoId), content = Just (encode todo), headers = [ContentType applicationJSON] }
   return $ decode res.response
 
 ajaxRemoveTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) Unit
 ajaxRemoveTodo todo@(Todo t) = do
-  res <- affjax $ defaultRequest { method = DELETE, url = (baseURL ++ show t.todoId) }
+  res <- affjax $ defaultRequest { method = DELETE, url = (baseURL ++ show t._todoId) }
   liftEff $ log res.response
   return unit

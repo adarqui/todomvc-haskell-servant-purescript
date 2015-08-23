@@ -12,12 +12,12 @@ import Model.Types
 todoFromObj (Todo todo) = todo
 
 toggleTodoState' :: Todo -> Todo
-toggleTodoState' (Todo todo) = case todo.todoState of
-                                    Active -> Todo (todo{todoState = Completed})
-                                    Completed -> Todo (todo{todoState = Active})
+toggleTodoState' (Todo todo) = case todo._todoState of
+                                    Active -> Todo (todo{_todoState = Completed})
+                                    Completed -> Todo (todo{_todoState = Active})
 
 todoUpdateTitle :: String -> Todo -> Todo
-todoUpdateTitle title (Todo todo) = Todo (todo { todoTitle = title })
+todoUpdateTitle title (Todo todo) = Todo (todo { _todoTitle = title })
 
 -- | toggleTodoState
 --
@@ -28,9 +28,9 @@ toggleTodoState Completed = Active
 -- | defaultTodo
 --
 defaultTodo :: String -> Todo
-defaultTodo s = Todo { todoId: 0, todoTitle: s, todoState: Active }
+defaultTodo s = Todo { _todoId: 0, _todoTitle: s, _todoState: Active }
 
 -- | defaultTodoId
 --
 defaultTodoId :: Int -> String -> Todo
-defaultTodoId todo_id s = Todo { todoId: todo_id, todoTitle: s, todoState: Active }
+defaultTodoId todo_id s = Todo { _todoId: todo_id, _todoTitle: s, _todoState: Active }

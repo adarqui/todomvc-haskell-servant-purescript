@@ -132,13 +132,13 @@ list = component' render eval peek
     r <- liftQuery $ liftFI $ ajaxAddTodo (defaultTodo title)
     case r of
          Nothing   -> pure next
-         Just todo@(Todo t) -> modify (\st -> M.insert t.todoId todo st) $> next
+         Just todo@(Todo t) -> modify (\st -> M.insert t._todoId todo st) $> next
 
   eval (ListTodos next) = do
     r <- liftQuery $ liftFI $ ajaxListTodos
     case r of
       Nothing -> pure next
-      Just r' -> modify (\_ -> foldl (\acc (todo@(Todo t)) -> M.insert t.todoId todo acc) M.empty r') $> next
+      Just r' -> modify (\_ -> foldl (\acc (todo@(Todo t)) -> M.insert t._todoId todo acc) M.empty r') $> next
 
   peek :: Peek State ListInput (QueryF State TodoView TodoInput TodoEffects TodoPlaceholder p) (ChildF TodoPlaceholder TodoInput)
   peek (ChildF p q) = case q of
@@ -153,10 +153,10 @@ list = component' render eval peek
     _ -> pure unit
 
 removeTodo :: Todo -> State -> State
-removeTodo (Todo todo) st = M.delete todo.todoId st
+removeTodo (Todo todo) st = M.delete todo._todoId st
 
 updateTodo :: Todo -> State -> State
-updateTodo todo_@(Todo todo) st = M.update (const $ Just todo_) todo.todoId st
+updateTodo todo_@(Todo todo) st = M.update (const $ Just todo_) todo._todoId st
 
 -- | AJAX: List Todos
 ajaxListTodos :: forall eff. Aff (ajax :: AJAX | eff) (Maybe (Array Todo))

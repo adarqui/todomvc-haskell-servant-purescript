@@ -16,14 +16,14 @@ module Todo.App (
 ) where
 
 import           Control.Applicative
+import           Control.Lens
+import           Control.Lens.Operators
 import           Control.Monad
 import           Control.Monad.State.Lazy
-import           Data.Aeson
 import           Data.List
 import           Data.Text                (Text)
 import qualified Data.Text                as T
 import           GHC.Generics
-import           Todo.Instances
 import           Todo.Types
 import qualified Data.Map as M
 
@@ -83,7 +83,9 @@ findTodoById tid = M.lookup tid <$> gets _todoAppTodos
 -- | clearTodos
 --
 clearTodos :: TodoAppState Bool
-clearTodos = modify (\st -> st { _todoAppTodos = M.empty }) *> pure True
+clearTodos = do
+  todoAppTodos .= M.empty
+  pure True
 
 
 -- | incrTodoAppCounter
@@ -93,11 +95,8 @@ clearTodos = modify (\st -> st { _todoAppTodos = M.empty }) *> pure True
 --
 incrTodoAppCounter :: TodoAppState TodoId
 incrTodoAppCounter = do
-  counter <- gets _todoAppCounter
-  let
-    new_counter = counter + 1
-  modify (\st -> st { _todoAppCounter = new_counter })
-  return new_counter
+  todoAppCounter += 1
+  gets _todoAppCounter
 
 
 -- | defaultTodo

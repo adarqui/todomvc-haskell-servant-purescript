@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
+{-
 module Todo.Types (
   Todo (..),
   TodoActionRequest (..),
@@ -11,8 +13,12 @@ module Todo.Types (
   TodoAppState,
   TodoId
 ) where
+-}
+module Todo.Types where
 
 import           Control.Applicative
+import           Control.Lens
+import           Control.Lens.TH
 import           Control.Monad
 import           Control.Monad.State
 import           Data.Aeson
@@ -24,11 +30,24 @@ import           GHC.Generics
 
 type TodoId = Int
 
+data TodoState
+  = Active
+  | Completed
+  deriving (Show, Eq, Ord, Generic)
+
+instance FromJSON TodoState
+instance ToJSON TodoState
+
 data Todo = Todo {
   _todoId    :: TodoId,
   _todoTitle :: Text,
   _todoState :: TodoState
 } deriving (Show, Eq, Ord, Generic)
+
+makeLenses ''Todo
+
+instance FromJSON Todo
+instance ToJSON Todo
 
 data TodoActionRequest
   = ReqListTodos
@@ -48,14 +67,11 @@ data TodoActionResponse
   | RespClearTodos Bool
   deriving (Show, Eq, Ord, Generic)
 
-data TodoState
-  = Active
-  | Completed
-  deriving (Show, Eq, Ord, Generic)
-
 data TodoApp = TodoApp {
   _todoAppTodos   :: M.Map TodoId Todo,
   _todoAppCounter :: TodoId
 } deriving (Show, Eq, Ord, Generic)
+
+makeLenses ''TodoApp
 
 type TodoAppState a = State TodoApp a
