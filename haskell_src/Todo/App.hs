@@ -36,7 +36,7 @@ newTodoApp = TodoApp M.empty 0
 -- | listTodos
 --
 listTodos :: TodoAppState [Todo]
-listTodos = gets todoAppTodos >>= return . M.elems
+listTodos = gets _todoAppTodos >>= return . M.elems
 
 
 -- | addTodo
@@ -45,8 +45,8 @@ addTodo :: Todo -> TodoAppState Todo
 addTodo todo = do
   new_id <- incrTodoAppCounter
   let
-    todo' = todo { todoId = new_id }
-  modify (\st -> st { todoAppTodos = M.insert new_id todo' (todoAppTodos st) })
+    todo' = todo { _todoId = new_id }
+  modify (\st -> st { _todoAppTodos = M.insert new_id todo' (_todoAppTodos st) })
   return todo'
 
 
@@ -54,11 +54,11 @@ addTodo todo = do
 --
 removeTodo :: TodoId -> TodoAppState (Maybe TodoId)
 removeTodo tid = do
-  todos <- gets todoAppTodos
+  todos <- gets _todoAppTodos
   let
     e = M.lookup tid todos
   case e of
-    Just _ -> modify (\st -> st { todoAppTodos = M.delete tid (todoAppTodos st) }) *> (pure . pure) tid
+    Just _ -> modify (\st -> st { _todoAppTodos = M.delete tid (_todoAppTodos st) }) *> (pure . pure) tid
     _      -> pure Nothing
 
 
@@ -67,23 +67,23 @@ removeTodo tid = do
 updateTodo :: TodoId -> Todo -> TodoAppState (Maybe Todo)
 updateTodo tid new_todo = do
   let
-    new_todo' = new_todo { todoId = tid }
+    new_todo' = new_todo { _todoId = tid }
   todo <- findTodoById tid
   case todo of
-    Just todo' -> modify (\st -> st { todoAppTodos = M.update (const $ pure new_todo') tid (todoAppTodos st) }) *> (pure . pure) new_todo'
+    Just todo' -> modify (\st -> st { _todoAppTodos = M.update (const $ pure new_todo') tid (_todoAppTodos st) }) *> (pure . pure) new_todo'
     _          -> pure Nothing
 
 
 -- | findTodoById
 --
 findTodoById :: TodoId -> TodoAppState (Maybe Todo)
-findTodoById tid = M.lookup tid <$> gets todoAppTodos
+findTodoById tid = M.lookup tid <$> gets _todoAppTodos
 
 
 -- | clearTodos
 --
 clearTodos :: TodoAppState Bool
-clearTodos = modify (\st -> st { todoAppTodos = M.empty }) *> pure True
+clearTodos = modify (\st -> st { _todoAppTodos = M.empty }) *> pure True
 
 
 -- | incrTodoAppCounter
@@ -93,10 +93,10 @@ clearTodos = modify (\st -> st { todoAppTodos = M.empty }) *> pure True
 --
 incrTodoAppCounter :: TodoAppState TodoId
 incrTodoAppCounter = do
-  counter <- gets todoAppCounter
+  counter <- gets _todoAppCounter
   let
     new_counter = counter + 1
-  modify (\st -> st { todoAppCounter = new_counter })
+  modify (\st -> st { _todoAppCounter = new_counter })
   return new_counter
 
 

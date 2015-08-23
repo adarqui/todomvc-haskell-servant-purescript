@@ -25,9 +25,9 @@ import           GHC.Generics
 type TodoId = Int
 
 data Todo = Todo {
-  todoId    :: TodoId,
-  todoTitle :: Text,
-  todoState :: TodoState
+  _todoId    :: TodoId,
+  _todoTitle :: Text,
+  _todoState :: TodoState
 } deriving (Show, Eq, Ord, Generic)
 
 data TodoActionRequest
@@ -54,8 +54,8 @@ data TodoState
   deriving (Show, Eq, Ord, Generic)
 
 data TodoApp = TodoApp {
-  todoAppTodos   :: M.Map TodoId Todo,
-  todoAppCounter :: TodoId
+  _todoAppTodos   :: M.Map TodoId Todo,
+  _todoAppCounter :: TodoId
 } deriving (Show, Eq, Ord, Generic)
 
 type TodoAppState a = State TodoApp a

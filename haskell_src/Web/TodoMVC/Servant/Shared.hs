@@ -19,11 +19,12 @@ import           Control.Concurrent.STM
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Control.Monad.Trans.Either
+import           Control.Lens
 import           Servant
 import           Todo
 
 data BigState = BigState {
-  appTodoSimple :: TodoApp
+  _todoApp :: TodoApp
 }
 
 type Store = TVar BigState
@@ -61,8 +62,8 @@ runApp :: MonadIO m => Store -> State TodoApp b -> EitherT ServantErr m b
 runApp store cb = do
   liftIO $ atomically $ do
     v <- readTVar store
-    let (a, s) = runState cb (appTodoSimple v)
-    writeTVar store (v { appTodoSimple = s })
+    let (a, s) = runState cb (_todoApp v)
+    writeTVar store (v { _todoApp = s })
     return a
 
 -- | runApp_Maybe
