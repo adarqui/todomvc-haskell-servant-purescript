@@ -3,7 +3,6 @@
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
-{-
 module Todo.Types (
   Todo (..),
   TodoActionRequest (..),
@@ -11,21 +10,20 @@ module Todo.Types (
   TodoState (..),
   TodoApp (..),
   TodoAppState,
-  TodoId
+  TodoId,
+  todoId,
+  todoTitle,
+  todoState,
+  todoAppCounter,
+  todoAppTodos
 ) where
--}
-module Todo.Types where
 
-import           Control.Applicative
+
 import           Control.Lens
-import           Control.Lens.TH
-import           Control.Monad
 import           Control.Monad.State
 import           Data.Aeson
-import           Data.List
 import qualified Data.Map            as M
 import           Data.Text           (Text)
-import qualified Data.Text           as T
 import           GHC.Generics
 
 type TodoId = Int
