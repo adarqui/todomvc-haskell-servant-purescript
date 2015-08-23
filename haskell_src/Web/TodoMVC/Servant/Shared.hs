@@ -32,7 +32,6 @@ type LnAPI =
        "html" :> Raw
   :<|> "dist" :> Raw
   :<|> "static" :> Raw
-  -- application: simple todos
   -- GET /todos
   -- POST /todos , body = Todo
   -- DELETE /todos
@@ -51,13 +50,8 @@ todoAPI = Proxy
 
 -- | newBigState
 --
--- just creates our monstrous big state record
---
 newBigState :: IO (TVar BigState)
-newBigState =
-  newTVarIO $ BigState {
-  appTodoSimple = newTodoApp
-}
+newBigState = newTVarIO $ BigState newTodoApp
 
 -- | runApp
 --
@@ -76,11 +70,7 @@ runApp store cb = do
 -- returns an error if our todo action returns Nothing
 --
 runApp_Maybe :: MonadIO m => Store -> State TodoApp (Maybe b) -> EitherT ServantErr m b
-runApp_Maybe store cb = do
-  s <- runApp store cb
-  case s of
-    Nothing -> left err400
-    Just v  -> return v
+runApp_Maybe store cb = runApp store cb >>= maybe (left err400) return
 
 -- | apply2
 --
