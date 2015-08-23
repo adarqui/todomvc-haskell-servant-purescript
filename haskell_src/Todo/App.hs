@@ -25,17 +25,18 @@ import qualified Data.Text                as T
 import           GHC.Generics
 import           Todo.Instances
 import           Todo.Types
+import qualified Data.Map as M
 
 -- | newTodoApp
 --
 newTodoApp :: TodoApp
-newTodoApp = TodoApp [] 0
+newTodoApp = TodoApp M.empty 0
 
 
 -- | listTodos
 --
 listTodos :: TodoAppState [Todo]
-listTodos = gets todoAppTodos >>= return
+listTodos = gets todoAppTodos >>= return . M.elems
 
 
 -- | addTodo
@@ -45,7 +46,7 @@ addTodo todo = do
   new_id <- incrTodoAppCounter
   let
     todo' = todo { todoId = new_id }
-  modify (\st -> st { todoAppTodos = (todo' : todoAppTodos st) })
+  modify (\st -> st { todoAppTodos = M.insert new_id todo' (todoAppTodos st) })
   return todo'
 
 
@@ -55,42 +56,34 @@ removeTodo :: TodoId -> TodoAppState (Maybe TodoId)
 removeTodo tid = do
   todos <- gets todoAppTodos
   let
-    e      = find (\todo -> todoId todo == tid) todos
-    todos' = filter (\todo -> todoId todo /= tid) todos
-  if e == Nothing
-     then return Nothing
-     else modify (\st -> st { todoAppTodos = todos' }) >> (return $ Just tid)
+    e = M.lookup tid todos
+  case e of
+    Just _ -> modify (\st -> st { todoAppTodos = M.delete tid (todoAppTodos st) }) *> (pure . pure) tid
+    _      -> pure Nothing
 
 
 -- | updateTodo
 --
 updateTodo :: TodoId -> Todo -> TodoAppState (Maybe Todo)
 updateTodo tid new_todo = do
-  let new_todo' = new_todo { todoId = tid }
+  let
+    new_todo' = new_todo { todoId = tid }
   todo <- findTodoById tid
   case todo of
-    Nothing    -> return Nothing
-    Just todo' -> do
-      todos <- gets todoAppTodos
-      let filtered = filter (\todo -> todoId todo /= tid) todos
-      modify (\st -> st { todoAppTodos = new_todo' : filtered })
-      return $ Just new_todo'
+    Just todo' -> modify (\st -> st { todoAppTodos = M.update (const $ pure new_todo') tid (todoAppTodos st) }) *> (pure . pure) new_todo'
+    _          -> pure Nothing
 
 
 -- | findTodoById
 --
 findTodoById :: TodoId -> TodoAppState (Maybe Todo)
-findTodoById tid = do
-  todos <- gets todoAppTodos
-  return $ find (\todo -> todoId todo == tid) todos
+findTodoById tid = M.lookup tid <$> gets todoAppTodos
 
 
 -- | clearTodos
 --
 clearTodos :: TodoAppState Bool
-clearTodos = do
-  modify (\st -> st { todoAppTodos = [] })
-  return True
+clearTodos = modify (\st -> st { todoAppTodos = M.empty }) *> pure True
 
 
 -- | incrTodoAppCounter

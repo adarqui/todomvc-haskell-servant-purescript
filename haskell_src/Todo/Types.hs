@@ -17,6 +17,7 @@ import           Control.Monad
 import           Control.Monad.State
 import           Data.Aeson
 import           Data.List
+import qualified Data.Map            as M
 import           Data.Text           (Text)
 import qualified Data.Text           as T
 import           GHC.Generics
@@ -53,7 +54,7 @@ data TodoState
   deriving (Show, Eq, Ord, Generic)
 
 data TodoApp = TodoApp {
-  todoAppTodos   :: [Todo],
+  todoAppTodos   :: M.Map TodoId Todo,
   todoAppCounter :: TodoId
 } deriving (Show, Eq, Ord, Generic)
 
