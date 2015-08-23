@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE TypeFamilies      #-}
 {-# LANGUAGE TypeOperators     #-}
 
@@ -26,6 +27,8 @@ import           Todo
 data BigState = BigState {
   _todoApp :: TodoApp
 }
+
+makeLenses ''BigState
 
 type Store = TVar BigState
 
@@ -63,7 +66,7 @@ runApp store cb = do
   liftIO $ atomically $ do
     v <- readTVar store
     let (a, s) = runState cb (_todoApp v)
-    writeTVar store (v { _todoApp = s })
+    writeTVar store (set todoApp s v)
     return a
 
 -- | runApp_Maybe
