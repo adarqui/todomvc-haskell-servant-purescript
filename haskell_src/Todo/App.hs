@@ -23,7 +23,7 @@ import           Control.Monad.State.Lazy
 import           Data.List
 import           Data.Text                (Text)
 import qualified Data.Text                as T
-import           GHC.Generics
+import           GHC.Generics hiding (to)
 import           Todo.Types
 import qualified Data.Map as M
 
@@ -45,8 +45,8 @@ addTodo :: Todo -> TodoAppState Todo
 addTodo todo = do
   new_id <- incrTodoAppCounter
   let
-    todo' = todo { _todoId = new_id }
-  modify (\st -> st { _todoAppTodos = M.insert new_id todo' (_todoAppTodos st) })
+    todo' = set todoId new_id todo
+  todoAppTodos %= M.insert new_id todo'
   return todo'
 
 
@@ -54,12 +54,31 @@ addTodo todo = do
 --
 removeTodo :: TodoId -> TodoAppState (Maybe TodoId)
 removeTodo tid = do
+  -- trying to get this 'use' to work like this 'view':
+  -- view (C.to (M.lookup 1)) M.empty
+  e <- use (to (M.lookup tid)) todoAppTodos
+  maybe (return Nothing) (const del) e
+  where
+    del = todoAppTodos %= M.delete tid >> (pure . pure) tid
+
+{-
+  todos <- gets _todoAppTodos
+  let
+    e = M.lookup tid todos
+  case e of
+    Just _ -> do
+      todoAppTodos %= M.delete tid
+      return $ Just tid
+    _      -> pure Nothing
+    -}
+{-
   todos <- gets _todoAppTodos
   let
     e = M.lookup tid todos
   case e of
     Just _ -> modify (\st -> st { _todoAppTodos = M.delete tid (_todoAppTodos st) }) *> (pure . pure) tid
     _      -> pure Nothing
+    -}
 
 
 -- | updateTodo
@@ -77,7 +96,7 @@ updateTodo tid new_todo = do
 -- | findTodoById
 --
 findTodoById :: TodoId -> TodoAppState (Maybe Todo)
-findTodoById tid = M.lookup tid <$> gets _todoAppTodos
+findTodoById tid =  M.lookup tid <$> gets _todoAppTodos
 
 
 -- | clearTodos
