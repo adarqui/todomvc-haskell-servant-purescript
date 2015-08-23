@@ -17,8 +17,8 @@ import           Control.Monad
 import           Control.Monad.State
 import           Data.Aeson
 import           Data.List
-import           Data.Text            (Text)
-import qualified Data.Text            as T
+import           Data.Text           (Text)
+import qualified Data.Text           as T
 import           GHC.Generics
 
 type TodoId = Int
@@ -34,14 +34,8 @@ data TodoActionRequest
   | ReqAddTodo Todo
   | ReqRemoveTodo TodoId
   | ReqUpdateTodo TodoId Todo
-  | ReqSetTodoActive TodoId
-  | ReqSetTodoCompleted TodoId
   | ReqFindTodoById TodoId
-  | ReqFindTodosByTitle Text
-  | ReqFindActiveTodos
-  | ReqFindCompletedTodos
   | ReqClearTodos
-  | ReqClearCompletedTodos
   deriving (Show, Eq, Ord, Generic)
 
 data TodoActionResponse
@@ -49,14 +43,8 @@ data TodoActionResponse
   | RespAddTodo (Maybe Todo)
   | RespRemoveTodo (Maybe TodoId)
   | RespUpdateTodo (Maybe Todo)
-  | RespSetTodoActive (Maybe Todo)
-  | RespSetTodoCompleted (Maybe Todo)
   | RespFindTodoById (Maybe Todo)
-  | RespFindTodosByTitle [Todo]
-  | RespFindActiveTodos [Todo]
-  | RespFindCompletedTodos [Todo]
   | RespClearTodos Bool
-  | RespClearCompletedTodos Bool
   deriving (Show, Eq, Ord, Generic)
 
 data TodoState
