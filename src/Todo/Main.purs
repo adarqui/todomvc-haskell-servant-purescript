@@ -26,7 +26,7 @@ import Shared
 
 ui :: forall p.
   InstalledComponentP                   -- InstalledComponentP s s' f f' g o o' p p' =
-    State                               -- s
+    ListState                           -- s
     TodoView                            -- s'
     ListInput                           -- f
     TodoInput                           -- f'
@@ -42,4 +42,4 @@ main = launchAff $ do
   app <- runUI ui (installedState initialState)
   appendToBody app.node
   app.driver (action ListTodos)
-  makeAff (\e r -> hashChanged (\from to -> launchAff $ app.driver (action ListTodos)))
+  makeAff (\e r -> hashChanged (\from to -> launchAff $ app.driver (action (SetView to))))

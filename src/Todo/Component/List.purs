@@ -41,6 +41,7 @@ import Network.HTTP.MimeType.Common
 import Network.HTTP.RequestHeader
 
 import Model
+import Component.List.Instances
 import Component.List.Types
 import Component.Todo
 import Shared
@@ -53,7 +54,7 @@ import qualified Data.String as S
 
 list :: forall p.
   ParentComponentP
-    State
+    ListState
     TodoView
     ListInput
     TodoInput
@@ -65,8 +66,8 @@ list :: forall p.
 list = component' render eval peek
   where
 
-  render :: Render State ListInput TodoPlaceholder
-  render st = appLayout
+  render :: Render ListState ListInput TodoPlaceholder
+  render (ListState st) = appLayout
 
     where
 
@@ -96,7 +97,7 @@ list = component' render eval peek
       H.section [_class "main"] [
         H.input [_class "toggle-all", P.type_ "checkbox"], -- [H.label_ [H.text "Mark all as complete"]],
 --        H.ul [_class "todo-list"] $ map (H.Placeholder <<< TodoPlaceholder) todosFilter
-          H.ul [_class "todo-list"] $ map (H.Placeholder <<< TodoPlaceholder) (M.elems st),
+          H.ul [_class "todo-list"] $ map (H.Placeholder <<< TodoPlaceholder) todosFilter,
         H.footer [_class "footer"] [
 --          H.span [_class "todo-count"] [H.strong_ [H.text $ show $ length $ run listActiveTodos], H.text " items left"],
           H.ul [_class "filters"] [
@@ -117,7 +118,16 @@ list = component' render eval peek
         H.p_ [H.text "Part of ", H.a [P.href "http://todomvc.com"] [H.text "TodoMVC"]]
       ]
 
-  eval :: Eval ListInput State ListInput (QueryF State TodoView TodoInput TodoEffects TodoPlaceholder p)
+    -- | todosFilter
+    -- Filters the todo list based on the hash routes.
+    --
+    todosFilter :: Array Todo
+    todosFilter
+      | st.view == ListViewActive    = filter isListActive $ M.elems st.todos
+      | st.view == ListViewCompleted = filter isListCompleted $ M.elems st.todos
+      | otherwise                    = M.elems st.todos
+
+  eval :: Eval ListInput ListState ListInput (QueryF ListState TodoView TodoInput TodoEffects TodoPlaceholder p)
 
   eval (GetState next) = do
     pure next
@@ -126,21 +136,20 @@ list = component' render eval peek
     r <- liftQuery $ liftFI $ ajaxAddTodo (defaultTodo title)
     case r of
          Nothing   -> pure next
-         Just todo@(Todo t) -> modify (\st -> M.insert t._todoId todo st) $> next
+         Just todo@(Todo t) -> modify (\(ListState st) -> ListState { todos: M.insert t._todoId todo st.todos, view: st.view }) $> next
 
   eval (ListTodos next) = do
     r <- liftQuery $ liftFI $ ajaxListTodos
     case r of
       Nothing -> pure next
-      Just r' -> modify (\_ -> foldl (\acc (todo@(Todo t)) -> M.insert t._todoId todo acc) M.empty r') $> next
+      Just r' -> modify (\(ListState st) -> ListState { todos: foldl (\acc (todo@(Todo t)) -> M.insert t._todoId todo acc) M.empty r', view: st.view }) $> next
 
   eval (SetView hash next) = do
     let view = handleViewChange hash
---    modify (\st -> 
-    pure next
+    modify (\(ListState st) -> ListState { todos: st.todos, view: view }) $> next
 
 
-  peek :: Peek State ListInput (QueryF State TodoView TodoInput TodoEffects TodoPlaceholder p) (ChildF TodoPlaceholder TodoInput)
+  peek :: Peek ListState ListInput (QueryF ListState TodoView TodoInput TodoEffects TodoPlaceholder p) (ChildF TodoPlaceholder TodoInput)
   peek (ChildF p q) = case q of
 
     Remove _ -> do
@@ -152,13 +161,19 @@ list = component' render eval peek
       maybe (pure unit) (modify <<< updateTodo) t
     _ -> pure unit
 
-removeTodo :: Todo -> State -> State
-removeTodo (Todo todo) st = M.delete todo._todoId st
+removeTodo :: Todo -> ListState -> ListState
+removeTodo (Todo todo) (ListState st) = ListState { todos: M.delete todo._todoId st.todos, view: st.view }
 
-updateTodo :: Todo -> State -> State
-updateTodo todo_@(Todo todo) st = M.update (const $ Just todo_) todo._todoId st
+updateTodo :: Todo -> ListState -> ListState
+updateTodo todo_@(Todo todo) (ListState st) = ListState { todos: M.update (const $ Just todo_) todo._todoId st.todos, view: st.view }
 
 handleViewChange :: String -> ListView
 handleViewChange "active"    = ListViewActive
 handleViewChange "completed" = ListViewCompleted
 handleViewChange _           = ListViewAll
+
+isListActive :: Todo -> Boolean
+isListActive (Todo todo) = todo._todoState == Active
+
+isListCompleted :: Todo -> Boolean
+isListCompleted (Todo todo) = todo._todoState == Completed
