@@ -125,14 +125,3 @@ todo = component render eval
   eval (GetTodo next) = do
     (TodoView t) <- gets id
     pure (next t.tvTodo)
-
-ajaxUpdateTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) (Maybe Todo)
-ajaxUpdateTodo todo@(Todo t) = do
-  res <- affjax $ defaultRequest { method = PUT, url = (baseURL ++ show t._todoId), content = Just (encode todo), headers = [ContentType applicationJSON] }
-  return $ decode res.response
-
-ajaxRemoveTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) Unit
-ajaxRemoveTodo todo@(Todo t) = do
-  res <- affjax $ defaultRequest { method = DELETE, url = (baseURL ++ show t._todoId) }
-  liftEff $ log res.response
-  return unit

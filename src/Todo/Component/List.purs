@@ -1,5 +1,5 @@
 module Component.List (
-  ListInput (..),
+  module Component.List.Types,
   list
 ) where
 
@@ -41,6 +41,7 @@ import Network.HTTP.MimeType.Common
 import Network.HTTP.RequestHeader
 
 import Model
+import Component.List.Types
 import Component.Todo
 import Shared
 import qualified Helpers.Map as M
@@ -49,13 +50,6 @@ import Helpers.Monad
 import Helpers.Monad.Array
 
 import qualified Data.String as S
-
-data ListInput a
-  = NewTodo String a
-  | ListTodos a
-  | ListedTodos (Array Todo) a
-  | SetView a
-  | GetState a
 
 list :: forall p.
   ParentComponentP
@@ -140,6 +134,12 @@ list = component' render eval peek
       Nothing -> pure next
       Just r' -> modify (\_ -> foldl (\acc (todo@(Todo t)) -> M.insert t._todoId todo acc) M.empty r') $> next
 
+  eval (SetView hash next) = do
+    let view = handleViewChange hash
+--    modify (\st -> 
+    pure next
+
+
   peek :: Peek State ListInput (QueryF State TodoView TodoInput TodoEffects TodoPlaceholder p) (ChildF TodoPlaceholder TodoInput)
   peek (ChildF p q) = case q of
 
@@ -158,13 +158,7 @@ removeTodo (Todo todo) st = M.delete todo._todoId st
 updateTodo :: Todo -> State -> State
 updateTodo todo_@(Todo todo) st = M.update (const $ Just todo_) todo._todoId st
 
--- | AJAX: List Todos
-ajaxListTodos :: forall eff. Aff (ajax :: AJAX | eff) (Maybe (Array Todo))
-ajaxListTodos = do
-  res <- get baseURL
-  return $ decode res.response
-
-ajaxAddTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) (Maybe Todo)
-ajaxAddTodo todo = do
-  res <- affjax $ defaultRequest { method = POST, url = baseURL, content = Just (encode todo), headers = [ContentType applicationJSON] }
-  return $ decode res.response
+handleViewChange :: String -> ListView
+handleViewChange "active"    = ListViewActive
+handleViewChange "completed" = ListViewCompleted
+handleViewChange _           = ListViewAll

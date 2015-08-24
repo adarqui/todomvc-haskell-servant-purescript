@@ -2,10 +2,11 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Aff (Aff(), runAff, later', launchAff)
+import Control.Monad.Aff (Aff(), runAff, later', launchAff, makeAff)
 import Control.Monad.Eff (Eff())
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE())
-import Control.Monad.Eff.Exception (throwException)
+import Control.Monad.Eff.Exception (EXCEPTION(), throwException)
 import Control.Plus (Plus)
 
 import Data.Const (Const())
@@ -15,6 +16,8 @@ import Network.HTTP.Affjax (AJAX())
 
 import Halogen
 import Halogen.Util (appendToBody)
+
+import Routing
 
 import Model
 import Component.List
@@ -39,3 +42,4 @@ main = launchAff $ do
   app <- runUI ui (installedState initialState)
   appendToBody app.node
   app.driver (action ListTodos)
+  makeAff (\e r -> hashChanged (\from to -> launchAff $ app.driver (action ListTodos)))
