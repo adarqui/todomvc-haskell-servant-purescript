@@ -96,16 +96,15 @@ list = component' render eval peek
     todoListAndRoutes =
       H.section [_class "main"] [
         H.input [_class "toggle-all", P.type_ "checkbox"], -- [H.label_ [H.text "Mark all as complete"]],
---        H.ul [_class "todo-list"] $ map (H.Placeholder <<< TodoPlaceholder) todosFilter
           H.ul [_class "todo-list"] $ map (H.Placeholder <<< TodoPlaceholder) todosFilter,
         H.footer [_class "footer"] [
---          H.span [_class "todo-count"] [H.strong_ [H.text $ show $ length $ run listActiveTodos], H.text " items left"],
+          H.span [_class "todo-count"] [H.strong_ [H.text $ show $ length $ filter isListActive $ M.elems st.todos], H.text " items left"],
           H.ul [_class "filters"] [
             H.li_ [H.a [P.href "#"] [H.text "All"]],
             H.li_ [H.a [P.href "#active"] [H.text "Active"]],
             H.li_ [H.a [P.href "#completed"] [H.text "Completed"]]
-          ]
---          H.button [_class "clear-completed", E.onClick (const $ pure (handleClearCompleted $ run listCompletedTodos))] [H.text "Clear completed"]
+          ],
+          H.button [_class "clear-completed", E.onClick (E.input_ ClearTodos)] [H.text "Clear completed"]
         ]
       ]
 
@@ -143,6 +142,11 @@ list = component' render eval peek
     case r of
       Nothing -> pure next
       Just r' -> modify (\(ListState st) -> ListState { todos: foldl (\acc (todo@(Todo t)) -> M.insert t._todoId todo acc) M.empty r', view: st.view }) $> next
+
+  eval (ClearTodos next) = do
+    r <- liftQuery $ liftFI $ ajaxClearTodos
+    modify (\(ListState st) -> ListState { todos: M.empty, view: st.view })
+    pure next
 
   eval (SetView hash next) = do
     let view = handleViewChange hash

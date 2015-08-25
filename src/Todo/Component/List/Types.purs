@@ -11,7 +11,7 @@ import qualified Data.Map as M
 data ListInput a
   = NewTodo String a
   | ListTodos a
-  | ListedTodos (Array Todo) a
+  | ClearTodos a
   | SetView String a
   | GetState a
 

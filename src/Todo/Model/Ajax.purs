@@ -2,7 +2,8 @@ module Model.Ajax (
   ajaxListTodos,
   ajaxAddTodo,
   ajaxRemoveTodo,
-  ajaxUpdateTodo
+  ajaxUpdateTodo,
+  ajaxClearTodos
 ) where
 
 import Prelude
@@ -43,5 +44,11 @@ ajaxUpdateTodo todo@(Todo t) = do
 ajaxRemoveTodo :: forall eff. Todo -> Aff (ajax :: AJAX | eff) Unit
 ajaxRemoveTodo todo@(Todo t) = do
   res <- affjax $ defaultRequest { method = DELETE, url = (baseURL ++ show t._todoId) }
+  liftEff $ log res.response
+  return unit
+
+ajaxClearTodos :: forall eff. Aff (ajax :: AJAX | eff) Unit
+ajaxClearTodos = do
+  res <- affjax $ defaultRequest { method = DELETE, url = baseURL }
   liftEff $ log res.response
   return unit
