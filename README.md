@@ -8,7 +8,7 @@ not done yet.. lots of stuff to improve:
 This is just an example of a few things I like:
 - [Haskell](https://www.haskell.org)
 - [Haskell's Servant library](https://github.com/haskell-servant/servant)
-- [PureScript](https://www.purescript.org)
+- [PureScript](http://www.purescript.org)
 - [PureScript's Halogen library](https://github.com/slamdata/purescript-halogen)
 
 pc!
