@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Aff (Aff(), runAff, later', launchAff, makeAff)
+import Control.Monad.Aff (Aff(), launchAff, makeAff)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE())
@@ -17,7 +17,7 @@ import Network.HTTP.Affjax (AJAX())
 import Halogen
 import Halogen.Util (appendToBody)
 
-import Routing
+import Routing (hashChanged)
 
 import Model
 import Component.List
