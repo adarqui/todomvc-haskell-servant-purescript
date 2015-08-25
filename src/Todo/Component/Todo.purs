@@ -18,7 +18,6 @@ import Control.Monad.Aff (Aff())
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE(), log)
 import Control.Monad.Free (Free(), liftFI)
-import Network.HTTP.Affjax (AJAX(), get)
 
 import Halogen
 import Halogen.Query.StateF (modify, gets, get)
@@ -26,14 +25,6 @@ import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Properties as P
 import qualified Halogen.HTML.Events as E
 import qualified Halogen.HTML.Events.Forms as E
-
-import Network.HTTP.Affjax (AJAX(), affjax, defaultRequest)
-import Network.HTTP.Method
-import Network.HTTP.MimeType
-import Network.HTTP.MimeType.Common
-import Network.HTTP.RequestHeader
-
-import Data.String
 
 import Model
 import Shared

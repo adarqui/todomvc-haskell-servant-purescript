@@ -34,12 +34,6 @@ import qualified Halogen.HTML.Properties as P
 import qualified Halogen.HTML.Events as E
 import qualified Halogen.HTML.Events.Forms as E
 
-import Network.HTTP.Affjax
-import Network.HTTP.Method
-import Network.HTTP.MimeType
-import Network.HTTP.MimeType.Common
-import Network.HTTP.RequestHeader
-
 import Model
 import Component.List.Instances
 import Component.List.Types
