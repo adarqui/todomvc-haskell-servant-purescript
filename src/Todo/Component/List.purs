@@ -5,26 +5,15 @@ module Component.List (
 
 import Prelude
 
-import Control.Monad (when)
-import Control.Monad.Aff (Aff(), runAff, launchAff)
-import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE(), log)
-import Control.Monad.Free (Free(), liftFI)
-import Control.Monad.Aff.AVar (AVAR (..))
-import Control.Monad.Eff.Exception (EXCEPTION (..), throwException)
+import Control.Monad.Aff (Aff())
+import Control.Monad.Free (liftFI)
 
-import qualified Control.Monad.State as St
-import qualified Control.Monad.State.Trans as St
-import qualified Control.Monad.State.Class as St
-
-import Data.Array (snoc, filter, length, range, zip)
+import Data.Array (filter, length)
 import Data.Const (Const())
 import Data.Foldable (foldl)
 import Data.Functor (($>))
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Void (Void())
-import Data.JSON (decode, encode)
 import qualified Data.Map as M
 
 import Halogen
@@ -41,10 +30,6 @@ import Component.Todo
 import Shared
 import qualified Helpers.Map as M
 import Helpers.UI (_class)
-import Helpers.Monad
-import Helpers.Monad.Array
-
-import qualified Data.String as S
 
 list :: forall p.
   ParentComponentP
