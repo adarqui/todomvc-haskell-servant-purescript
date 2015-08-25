@@ -4,7 +4,6 @@ module Shared (
 ) where
 
 import Prelude
-import DOM (DOM())
 import Halogen
 import Control.Monad.Aff (Aff())
 import Control.Monad.Eff.Console (CONSOLE())
